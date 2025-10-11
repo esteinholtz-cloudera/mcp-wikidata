@@ -6,9 +6,9 @@ from langchain_mcp_adapters.tools import load_mcp_tools
 from langgraph.prebuilt import create_react_agent
 from langchain_openai import ChatOpenAI
 
-os.environ["OPENAI_API_KEY"] = "your-api-key"
+# os.environ["OPENAI_API_KEY"] = "your-api-key"
 
-model = ChatOpenAI(model="gpt-4o")
+model = ChatOpenAI(model="gpt-4o-mini")
 
 server_py = os.path.join(os.path.dirname(os.path.abspath(__file__)), "server.py")
 server_params = StdioServerParameters(
