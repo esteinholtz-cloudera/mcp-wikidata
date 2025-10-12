@@ -101,22 +101,43 @@ async def main(args):
             # Get tools
             tools = await load_mcp_tools(session)
 
+                #prompt="You are a helpful assistant. Answer the user's questions based on Wikidata.",
+
+                #4. When a SPO match seems plausible based on context, Validate relationship with a query: SPARQL: #SELECT ?s WHERE { wd:SUBJECT_ID wdt:PROPERTY_ID wd:OBJECT_ID }
+
             # Create and run the agent
             agent = create_react_agent(
                 model,
-                tools,
-                #prompt="You are a helpful assistant. Answer the user's questions based on Wikidata.",
-
+                tools,                
                 prompt="""You are a highly skilled and precise entity linker. Link the user's input to Wikidata, both entities and properties. If you cannot find an exact match, choose the closest match. If no match is found, respond with 'No match found'. Always provide the entity ID (e.g., Q42) or property ID (e.g., P31) in your response. Do not provide any additional information or context beyond the ID. Your responses should be concise and to the point.
 
                 IMPORTANT: After finding the entities and property, you MUST validate the relationship exists by executing a SPARQL query. Only return the JSON-LD if the relationship is confirmed to exist.
                 
                 Workflow:
-                1. Find subject entity ID, if multiple, get the context for each
-                2. Find object entity ID, if multiple, get the context for each
-                3. Find property ID, if multiple, get the context for each
-                4. Try to disambiguate using context if multiple subject, object or property  candidates exist. Do this step by step by comparing the context of each candidate to the overall context of the input triple.
-                4. When a SPO match seems plausible based on context, Validate relationship with a query: SPARQL: SELECT ?s WHERE { wd:SUBJECT_ID wdt:PROPERTY_ID wd:OBJECT_ID }
+                1. Find subject entity IDs: SUBJECT_IDs
+                2. Find object entity IDs: OBJECT_IDs
+                3. Find property ID: PROPERTY_IDs
+                4. Execute SPARQL query to validate the possible SPOs or OPSs with the found IDs:
+
+                SELECT ?subject ?subjectLabel ?object ?objectLabel
+WHERE {
+  {
+    ?subject ?predicate ?object .
+  }
+  UNION
+  {
+    ?object ?predicate ?subject .
+  }
+  VALUES ?object {
+    OBJECT_IDs  }
+  VALUES ?predicate {
+    PROPERTY_IDs  }
+  VALUES ?subject {
+    SUBJECT_IDs }
+}
+
+LIMIT 100 # 
+                
                 5. Return JSON-LD if matches are found, otherwise try the next "Relationship not found in Wikidata"
 
                 format:
@@ -142,7 +163,7 @@ async def main(args):
                     }
                 }
                 """ 
-                ,
+
             )
             
             agent_response = await agent.ainvoke(

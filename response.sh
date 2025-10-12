@@ -1,0 +1,1 @@
+cat $1 | jq -r '.messages[] | select(.role=="ai" and .content != "") | .content' |jq
