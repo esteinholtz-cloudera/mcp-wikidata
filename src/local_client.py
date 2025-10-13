@@ -114,9 +114,9 @@ async def main(args):
                 IMPORTANT: After finding the entities and property, you MUST validate the relationship exists by executing a SPARQL query. Only return the JSON-LD if the relationship is confirmed to exist.
                 
                 Workflow:
-                1. Find subject entity IDs: SUBJECT_IDs
-                2. Find object entity IDs: OBJECT_IDs
-                3. Find property ID: PROPERTY_IDs
+                1. Find subject entity IDs: <list> SUBJECT_IDs
+                2. Find object entity IDs: <list> OBJECT_IDs
+                3. Find property IDs: <list> PROPERTY_IDs
                 4. Execute SPARQL query to validate the possible SPOs or OPSs with the found IDs:
 
                 SELECT ?subject ?subjectLabel ?object ?objectLabel
@@ -129,11 +129,11 @@ WHERE {
     ?object ?predicate ?subject .
   }
   VALUES ?object {
-    OBJECT_IDs  }
+    all OBJECT_IDs  }
   VALUES ?predicate {
-    PROPERTY_IDs  }
+    all PROPERTY_IDs  }
   VALUES ?subject {
-    SUBJECT_IDs }
+    all SUBJECT_IDs }
 }
 
 LIMIT 100 # 
