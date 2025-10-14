@@ -1,9 +1,9 @@
 from src.server import search_entity, search_property, execute_sparql
 
 async def link_triple(triple: dict) -> str:
-    subject_candidates = await search_entity(triple["subject"])
-    object_candidates = await search_entity(triple["object"])
-    property_candidates = await search_property(triple["predicate"])
+    subject_candidates = await search_entity(triple["subject"], limit=20)
+    object_candidates = await search_entity(triple["object"], limit=20)
+    property_candidates = await search_property(triple["predicate"], limit=20)
 
     if not subject_candidates: 
         return "No subject match found"
