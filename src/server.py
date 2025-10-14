@@ -10,7 +10,7 @@ WIKIDATA_URL = "https://www.wikidata.org/w/api.php"
 HEADER = {"Accept": "application/json", "User-Agent": "foobar"}
 
 
-async def search_wikidata(query: str, is_entity: bool = True, limit: int=10) -> str:
+async def search_wikidata(query: str, is_entity: bool = True, limit: int=1) -> str:
     """
     Search for a Wikidata item or property ID by its query.
     """
@@ -19,7 +19,7 @@ async def search_wikidata(query: str, is_entity: bool = True, limit: int=10) -> 
         "list": "search",
         "srsearch": query,
         "srnamespace": 0 if is_entity else 120,
-        "srlimit": limit,  # TODO: add a parameter to limit the number of results?
+        "srlimit": limit, 
         "srqiprofile": "classic_noboostlinks" if is_entity else "classic",
         "srwhat": "text",
         "format": "json",
@@ -38,7 +38,7 @@ async def search_wikidata(query: str, is_entity: bool = True, limit: int=10) -> 
 
 
 @server.tool()
-async def search_entity(query: str, limit: int=10) -> str:
+async def search_entity(query: str, limit: int=1) -> str:
     """
     Search for a Wikidata entity ID by its query.
 
@@ -52,7 +52,7 @@ async def search_entity(query: str, limit: int=10) -> str:
 
 
 @server.tool()
-async def search_property(query: str) -> str:
+async def search_property(query: str, limit:int=1) -> str:
     """
     Search for a Wikidata property ID by its query.
 
@@ -62,7 +62,7 @@ async def search_property(query: str) -> str:
     Returns:
         str: The Wikidata property ID corresponding to the given query."
     """
-    return await search_wikidata(query, is_entity=False)
+    return await search_wikidata(query, is_entity=False, limit=limit)
 
 
 @server.tool()
