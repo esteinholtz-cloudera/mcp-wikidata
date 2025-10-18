@@ -17,4 +17,13 @@ example = [
     "langgraph>=0.3.21",
     "langchain-core>=0.3.49",
     "langchain-mcp-adapters>=0.0.6",
+    "langchain-ollama>=0.0.5",
 ]
+
+[project.scripts]
+mcp-wikidata = "mcp_wikidata.server:main"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+

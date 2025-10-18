@@ -150,9 +150,10 @@ async def get_metadata(entity_id: str, language: str = "en") -> Dict[str, str]:
     )
     return {"Label": label, "Descriptions": descriptions}
 
-
-if __name__ == "__main__":
-    print("Starting server on port 5001...")
+def main():
+    print("Starting mcp-wikidata server on port 5001...")
     server.run()
 
-
+if __name__ == "__main__":
+    print("Starting mcp-wikidata server on port 5001...")
+    server.run()

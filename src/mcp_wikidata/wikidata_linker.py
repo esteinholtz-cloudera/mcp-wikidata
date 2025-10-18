@@ -1,4 +1,9 @@
-from src.server import search_entity, search_property, execute_sparql
+from mcp_wikidata.server import search_entity, search_property, execute_sparql
+
+import asyncio
+import sys
+import argparse
+import ast
 
 async def link_triple(triple: dict) -> str:
     subject_candidates = await search_entity(triple["subject"], limit=20)
@@ -35,9 +40,8 @@ async def link_triple(triple: dict) -> str:
         VALUES ?object {{
             {values_object_clause}
         }}
-        
-        }}  LIMIT 10 
 
+        }}  LIMIT 10
     """
 
     sparql_result = await execute_sparql(sparql_query)
@@ -47,22 +51,36 @@ async def link_triple(triple: dict) -> str:
     return "No match found"
 
 async def main():
-    subject = "Douglas Adams"
-    property = "author of"
-    object = "The Hitchhiker's Guide to the Galaxy"
+    parser = argparse.ArgumentParser(description="Process triples and format output.")
+    subparsers = parser.add_subparsers(dest='command', required=True)
 
-    # read arguments from command line if provided
-    import sys
-    triple_i = sys.argv[1]
+    # Subparser for plain format
+    plain_parser = subparsers.add_parser('plain', help='Input S, P, O as positional arguments.')
+    plain_parser.add_argument('subject', type=str, help='The subject of the triple.')
+    plain_parser.add_argument('predicate', type=str, help='The predicate of the triple.')
+    plain_parser.add_argument('object', type=str, help='The object of the triple.')
 
-# convert triple_i from string representation of dict to actual dict
-    import ast
-    triple = ast.literal_eval(triple_i)
+    # Subparser for json format
+    json_parser = subparsers.add_parser('json', help='Input a JSON representation of the triple.')
+    json_parser.add_argument('triple', type=str, help='A string representation of the triple in JSON format.')
+
+    args = parser.parse_args()
+
+    if args.command == 'plain':
+        triple = {
+            "subject": args.subject,
+            "predicate": args.predicate,
+            "object": args.object
+        }
+    elif args.command == 'json':
+        # Convert triple from string representation of dict to actual dict
+        triple = ast.literal_eval(args.triple)
+
+    print(f"input: {triple}", file=sys.stderr)
 
     result = await link_triple(triple)
     print(result)
 
 if __name__ == "__main__":
-    import asyncio
     asyncio.run(main())
 
