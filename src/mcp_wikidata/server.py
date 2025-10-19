@@ -1,8 +1,8 @@
-# reference: https://github.com/langchain-ai/langchain/blob/master/cookbook/wikibase_agent.ipynb
+
 import httpx
 import json
 from mcp.server.fastmcp import FastMCP
-from typing import List, Dict
+from typing import List, Dict, Any
 
 server = FastMCP("Wikidata MCP Server")
 
@@ -10,7 +10,7 @@ WIKIDATA_URL = "https://www.wikidata.org/w/api.php"
 HEADER = {"Accept": "application/json", "User-Agent": "foobar"}
 
 
-async def search_wikidata(query: str, is_entity: bool = True, limit: int=1) -> str:
+async def search_wikidata(query: str, is_entity: bool = True, limit: int = 1) -> List[str]:
     """
     Search for a Wikidata item or property ID by its query.
     """
@@ -38,7 +38,7 @@ async def search_wikidata(query: str, is_entity: bool = True, limit: int=1) -> s
 
 
 @server.tool()
-async def search_entity(query: str, limit: int=1) -> str:
+async def search_entity(query: str, limit: int = 5) -> List[str]:
     """
     Search for a Wikidata entity ID by its query.
 
@@ -52,7 +52,7 @@ async def search_entity(query: str, limit: int=1) -> str:
 
 
 @server.tool()
-async def search_property(query: str, limit:int=1) -> str:
+async def search_property(query: str, limit: int = 5) -> List[str]:
     """
     Search for a Wikidata property ID by its query.
 
@@ -90,7 +90,7 @@ async def get_properties(entity_id: str) -> List[str]:
 
 
 @server.tool()
-async def execute_sparql(sparql_query: str) -> str:
+async def execute_sparql(sparql_query: str) -> List[Dict[str, Any]]:
     """
     Execute a SPARQL query on Wikidata.
 
@@ -104,7 +104,7 @@ async def execute_sparql(sparql_query: str) -> str:
         sparql_query (str): The SPARQL query to execute.
 
     Returns:
-        str: The JSON-formatted result of the SPARQL query execution. If there are no results, an empty JSON object will be returned.
+        List[Dict[str, Any]]: The result of the SPARQL query execution. If there are no results, an empty list will be returned.
     """
     url = "https://query.wikidata.org/sparql"
     async with httpx.AsyncClient() as client:
@@ -112,9 +112,8 @@ async def execute_sparql(sparql_query: str) -> str:
             url, params={"query": sparql_query, "format": "json"}
         )
     response.raise_for_status()
-    result = response.json()["results"]["bindings"]
-    return json.dumps(result)
-
+    result = response.json()["results"]["bindings"]  # This is already a list
+    return result  # Return as a list directly
 
 @server.tool()
 async def get_metadata(entity_id: str, language: str = "en") -> Dict[str, str]:
@@ -150,10 +149,13 @@ async def get_metadata(entity_id: str, language: str = "en") -> Dict[str, str]:
     )
     return {"Label": label, "Descriptions": descriptions}
 
+
 def main():
     print("Starting mcp-wikidata server on port 5001...")
     server.run()
 
+
 if __name__ == "__main__":
     print("Starting mcp-wikidata server on port 5001...")
     server.run()
+

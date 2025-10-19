@@ -25,12 +25,26 @@ def get_model(args):
     else:
         raise ValueError(f"Unknown provider: {args.provider}")
 
-server_py = os.path.join(os.path.dirname(os.path.abspath(__file__)), "server.py")
-server_params = StdioServerParameters(
-    command="python",
-    args=[server_py],
-)
 
+# attempt to locate server.py in the same directory as this client script
+
+try:
+    # server_py = "uvx --from git+https://github.com/esteinholtz-cloudera/mcp-wikidata mcp-wikidata"
+    server_py = os.path.join(os.path.dirname(os.path.abspath(__file__)), "server.py")
+
+except Exception as e:
+    print(f"Error locating server.py: {e}", file=sys.stderr)
+    try:
+        server_py = os.path.join(os.path.dirname(os.path.abspath(__file__)), "server.py")
+        # server_py = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "mcp_wikidata", "server.py")
+    except Exception as e2:
+        print(f"Error locating server.py in fallback location: {e2}", file=sys.stderr)
+        sys.exit(1)
+
+server_params = StdioServerParameters(
+     command="python",
+     args=[server_py],
+)
 
 def make_serializable(obj):
     """Convert an object to a JSON-serializable format."""

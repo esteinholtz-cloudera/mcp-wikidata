@@ -27,3 +27,7 @@ mcp-wikidata = "mcp_wikidata.server:main"
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
+
+
+
+

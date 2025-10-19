@@ -1,0 +1,13 @@
+SELECT ?subject ?subjectLabel ?object ?objectLabel
+WHERE {
+  {
+    ?subject ?predicate ?object .
+  }
+  UNION
+  {
+    ?object ?predicate ?subject .
+  }
+        VALUES ?object { wd:Q161531 wd:Q643811 wd:Q785515 wd:Q97195464 wd:Q111948082 wd:Q4018151 wd:Q40896503 wd:Q16170490 wd:Q7968358 wd:Q111731093 }  
+        VALUES ?predicate { wdt:P50 wdt:P2093 wdt:P1153 wdt:P676 wdt:P405 wdt:P1006 wdt:P4955 wdt:P271 wdt:P3987 wdt:P428 }  
+        VALUES ?subject { wd:Q7243 wd:Q21697528 wd:Q4256164 wd:Q7487025 wd:Q860998 wd:Q94094381 wd:Q8018741 wd:Q53498088 wd:Q8306557 wd:Q19911795 }
+  }

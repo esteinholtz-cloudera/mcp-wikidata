@@ -10,6 +10,8 @@ from langchain_openai import ChatOpenAI
 
 model = ChatOpenAI(model="gpt-4o-mini")
 
+# Attempt to locate server.py in the same directory as this client script
+# FAIL
 server_py = os.path.join(os.path.dirname(os.path.abspath(__file__)), "server.py")
 server_params = StdioServerParameters(
     command="python",
