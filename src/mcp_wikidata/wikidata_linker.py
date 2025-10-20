@@ -1,54 +1,10 @@
-from mcp_wikidata.server import search_entity, search_property, execute_sparql
+from mcp_wikidata.server import link_triple
 
 import asyncio
 import sys
 import argparse
 import ast
-
-async def link_triple(triple: dict) -> str:
-    subject_candidates = await search_entity(triple["subject"], limit=20)
-    object_candidates = await search_entity(triple["object"], limit=20)
-    property_candidates = await search_property(triple["predicate"], limit=20)
-
-    if not subject_candidates: 
-        return "No subject match found"
-    if not object_candidates:
-        return "No object match found"
-    if not property_candidates:
-        return "No property match found"
-
-    values_subject_clause = "\n".join(f"wd:{item}" for item in subject_candidates)
-    values_property_clause = "\n".join(f"wdt:{item}" for item in property_candidates)
-    values_object_clause = "\n".join(f"wd:{item}" for item in object_candidates)
-
-    sparql_query = f"""
-        SELECT ?subject ?subjectLabel ?property ?propertyLabel ?object ?objectLabel
-        WHERE {{
-            {{
-                ?subject ?property ?object .
-            }}
-            UNION
-            {{
-                ?object ?property ?subject .
-            }}
-        VALUES ?subject {{
-            {values_subject_clause}
-        }}
-        VALUES ?property {{
-            {values_property_clause}
-        }}
-        VALUES ?object {{
-            {values_object_clause}
-        }}
-
-        }}  LIMIT 10
-    """
-
-    sparql_result = await execute_sparql(sparql_query)
-
-    if sparql_result and sparql_result != "{}":
-        return sparql_result
-    return "No match found"
+import json
 
 async def main():
     parser = argparse.ArgumentParser(description="Process triples and format output.")
@@ -79,7 +35,7 @@ async def main():
     print(f"input: {triple}", file=sys.stderr)
 
     result = await link_triple(triple)
-    print(result)
+    print(json.dumps(result))
 
 if __name__ == "__main__":
     asyncio.run(main())
