@@ -164,12 +164,12 @@ async def link_triple(triple: Dict) -> List[Dict]:
     property_candidates = await search_property(triple["predicate"], limit=20)
 
     if not subject_candidates: 
-        return "No subject match found"
+        return "[{}]"
     if not object_candidates:
-        return "No object match found"
+        return "[{}]"
     if not property_candidates:
-        return "No property match found"
-
+        return "[{}]"
+        
     values_subject_clause = "\n".join(f"wd:{item}" for item in subject_candidates)
     values_property_clause = "\n".join(f"wdt:{item}" for item in property_candidates)
     values_object_clause = "\n".join(f"wd:{item}" for item in object_candidates)
@@ -199,10 +199,25 @@ async def link_triple(triple: Dict) -> List[Dict]:
 
     sparql_result = await execute_sparql(sparql_query)
 
-    if sparql_result and sparql_result != "{}":
-        return sparql_result
-    return "No match found"
+    #if sparql_result and sparql_result != "{}":
+    return sparql_result
+    #return "[{}]"  
 
+
+@server.tool()
+async def link_triples(triples: List[Dict]) -> List[List[Dict]]:
+    '''validate and link multiple triples to wikidata
+        Args:
+        triples (List[Dict]): A list of dictionaries each with keys 'subject', 'predicate', and 'object'.
+    Returns:
+        A list of results, each being one or more matching triples from wikidata, in the form of a list of dicts, however adhering to wikidata's sparql json format
+        'subject', 'property', 'object'.
+    '''
+    results = []
+    for triple in triples:
+        result = await link_triple(triple)
+        results.append(result)
+    return results
 
 def main():
     print("Starting mcp-wikidata server")
