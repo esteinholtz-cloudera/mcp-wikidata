@@ -127,7 +127,7 @@ async def execute_sparql(sparql_query: str) -> List[Dict[str, Any]]:
     url = "https://query.wikidata.org/sparql"
     async with httpx.AsyncClient() as client:
         response = await client.get(
-            url, params={"query": sparql_query, "format": "json"}
+            url, headers=HEADER, params={"query": sparql_query, "format": "json"}
         )
     response.raise_for_status()
     result = response.json()["results"]["bindings"]  # This is already a list
