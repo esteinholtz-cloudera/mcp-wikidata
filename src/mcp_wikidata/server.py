@@ -12,29 +12,47 @@ HEADER = {"Accept": "application/json", "User-Agent": "foobar"}
 
 async def search_wikidata(query: str, is_entity: bool = True, limit: int = 1) -> List[str]:
     """
-    Search for a Wikidata item or property ID by its query.
+    Search for a Wikidata item or property ID by label/alias match.
+    Uses wbsearchentities for items (label/alias search) and the text search
+    API for properties, which don't support wbsearchentities.
     """
-    params = {
-        "action": "query",
-        "list": "search",
-        "srsearch": query,
-        "srnamespace": 0 if is_entity else 120,
-        "srlimit": limit, 
-        "srqiprofile": "classic_noboostlinks" if is_entity else "classic",
-        "srwhat": "text",
-        "format": "json",
-    }
-    async with httpx.AsyncClient() as client:
-        response = await client.get(WIKIDATA_URL, headers=HEADER, params=params)
-    response.raise_for_status()
-    try:
-        search_results = response.json()["query"]["search"]
-        if not search_results:
+    if is_entity:
+        params = {
+            "action": "wbsearchentities",
+            "search": query,
+            "language": "en",
+            "type": "item",
+            "limit": limit,
+            "format": "json",
+        }
+        async with httpx.AsyncClient() as client:
+            response = await client.get(WIKIDATA_URL, headers=HEADER, params=params)
+        response.raise_for_status()
+        results = response.json().get("search", [])
+        if not results:
             return "No results found. Consider changing the search term."
-        titles = [result["title"].split(":")[-1] for result in search_results]  # Collect all titles
-        return titles
-    except KeyError:
-        return "No results found. Consider changing the search term."
+        return [r["id"] for r in results]
+    else:
+        params = {
+            "action": "query",
+            "list": "search",
+            "srsearch": query,
+            "srnamespace": 120,
+            "srlimit": limit,
+            "srqiprofile": "classic",
+            "srwhat": "text",
+            "format": "json",
+        }
+        async with httpx.AsyncClient() as client:
+            response = await client.get(WIKIDATA_URL, headers=HEADER, params=params)
+        response.raise_for_status()
+        try:
+            search_results = response.json()["query"]["search"]
+            if not search_results:
+                return "No results found. Consider changing the search term."
+            return [r["title"].split(":")[-1] for r in search_results]
+        except KeyError:
+            return "No results found. Consider changing the search term."
 
 
 @server.tool()
