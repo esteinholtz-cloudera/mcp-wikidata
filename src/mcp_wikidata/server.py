@@ -131,23 +131,17 @@ async def get_metadata(entity_id: str, language: str = "en") -> Dict[str, str]:
         "action": "wbgetentities",
         "ids": entity_id,
         "props": "labels|descriptions",
-        "languages": language,  # specify the desired language
+        "languages": language,
         "format": "json",
     }
     async with httpx.AsyncClient() as client:
-        response = await client.get(WIKIDATA_URL, params=params)
+        response = await client.get(WIKIDATA_URL, headers=HEADER, params=params)
     response.raise_for_status()
     data = response.json()
     entity_data = data.get("entities", {}).get(entity_id, {})
-    label = (
-        entity_data.get("labels", {}).get(language, {}).get("value", "No label found")
-    )
-    descriptions = (
-        entity_data.get("descriptions", {})
-        .get(language, {})
-        .get("value", "No label found")
-    )
-    return {"Label": label, "Descriptions": descriptions}
+    label = entity_data.get("labels", {}).get(language, {}).get("value", "")
+    description = entity_data.get("descriptions", {}).get(language, {}).get("value", "")
+    return {"label": label, "description": description}
 
 @server.tool()
 async def link_triple(triple: Dict) -> List[Dict]:
